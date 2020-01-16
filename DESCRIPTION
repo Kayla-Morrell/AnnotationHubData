@@ -62,4 +62,4 @@ Collate:
     UCSCTrackUpdateChecker.R
     makeEnsemblTwoBit.R
     validationFunctions.R
-RoxygenNote: 7.0.2
+    constructHubFunctions.R

@@ -8,6 +8,7 @@ import(GenomicFeatures)
 import(RCurl)
 import(BiocManager)
 import(Biostrings)
+import(usethis)
 
 importFrom(biocViews, recommendPackages)
 importMethodsFrom(AnnotationDbi, exists, get, saveDb)
@@ -42,6 +43,7 @@ importFrom(utils,
     capture.output, data, download.file,
     read.delim, read.table, str, read.csv
 )
+importFrom(available, available_on_cran, available_on_bioc, valid_package_name)
 
 ### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ### Export S4 classes
@@ -85,7 +87,7 @@ export(
     makeStandardOrgDbsToAHM, makeStandardTxDbsToAHM,
     makeNCBIToOrgDbsToAHM,
     getSpeciesList, validSpecies, suggestSpecies, getValidSourceTypes,
-    checkSpeciesTaxId, validDispatchClass
+    checkSpeciesTaxId, validDispatchClass, hub_create_package
 )
 
 ### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
