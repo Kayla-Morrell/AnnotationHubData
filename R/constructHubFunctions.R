@@ -6,7 +6,9 @@ use_scripts <- function(filename)
     edit_file(proj_path("inst/scripts", filename), open = FALSE)
 }
 
-hub_create_package <- function(package, type = c("AH", "EH"))
+hub_create_package <- function(package, 
+    type = c("AnnotationHub", "ExperimentHub"),
+    fields = NULL, check_name = TRUE)
 {
     stopifnot(
         length(package) == 1 && is.character(package),
@@ -15,25 +17,26 @@ hub_create_package <- function(package, type = c("AH", "EH"))
         valid_package_name(package) == TRUE
     )
 
-    create_package(package)
+    create_package(package, fields = fields, check_name = check_name)
 
     ## Customization of the DESCRIPTION file
-    usethis:::use_description_field("License", "Artistic-2.0", overwrite = TRUE)
-    usethis:::use_description_field("LazyData", "false", overwrite = TRUE)
-    usethis:::use_description_field("Version", "0.99.0", overwrite = TRUE)
-
+    use_description(fields = list(License = "Artistic-2.0",
+        LazyData = "false",
+        Version = "0.99.0"),
+        check_name = FALSE)
+    
     use_package_doc()
     use_roxygen_md()
 
     if (type == "AH") {
         use_package("AnnotationHubData")
         use_package("AnnotationHub")
-        usethis:::use_description_field("biocViews", "AnnotationHub")
+        use_description(fields = list(biocViews =  "AnnotationHub"))
     }
     else {
         use_package("ExperimentHubData")
         use_package("ExperimentHub")
-        usethis:::use_description_field("biocViews", "ExperimentHub")
+        use_description(fields = list(biocViews = "ExperimentHub"))
     }
 
     ## Addition of README file
