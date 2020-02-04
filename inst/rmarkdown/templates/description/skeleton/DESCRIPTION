@@ -1,0 +1,14 @@
+Package: {{packageName}}
+Title: What the Package Does (One Line, Title Case)
+Version: {{version}}
+Description: What the package does (one paragraph).
+Authors@R:
+    person(given = "First",
+           family = "Last", 
+           role = c("aut", "cre"),
+           email = "first.last@example.com",
+           comment = c(ORCID = "YOUR-ORCID-ID"))
+License: {{license}}
+LazyData: FALSE
+Encoding: UTF-8
+biocViews: {{biocViews}}
