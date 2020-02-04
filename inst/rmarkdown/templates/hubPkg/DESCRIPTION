@@ -10,5 +10,6 @@ Authors@R:
            comment = c(ORCID = "YOUR-ORCID-ID"))
 License: {{license}}
 LazyData: FALSE
-Encoding: UTF-8
+Imports: {{imports}}
 biocViews: {{biocViews}}
+Encoding: UTF-8

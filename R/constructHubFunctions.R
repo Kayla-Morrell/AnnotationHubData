@@ -1,31 +1,61 @@
-use_scripts <- function(filename)
-{
-    stopifnot(length(filename) == 1 && is.character(filename))
-
-    use_directory("inst/scripts")
-    edit_file(proj_path("inst/scripts", filename), open = FALSE)
-}
+#use_scripts <- function(filename)
+#{
+#    stopifnot(length(filename) == 1 && is.character(filename))
+#
+#    use_directory("inst/scripts")
+#    edit_file(proj_path("inst/scripts", filename), open = FALSE)
+#}
 
 create_description <- function(type, fields)
 {
-    fl <- system.file("rmarkdown", 
-        "templates",
-        "description", 
-        "skeleton",
-        "DESCRIPTION",
+    fl <- system.file("rmarkdown", "templates", "hubPkg", "DESCRIPTION",
         package = "AnnotationHubData")
     tmpl <- readLines(fl)
 
     if (type == "AnnotationHub") {
         writeLines(whisker.render(tmpl, data = c(fields, 
-            list(biocViews = "AnnotationHub")
-        )), con = "DESCRIPTION")
+            list(
+                biocViews = "AnnotationHub",
+                imports = c("AnnotationHubData", "AnnotationHub")
+            ))), con = "DESCRIPTION")
     }
     else {
         writeLines(whisker.render(tmpl, data = c(fields,
-            list(biocViews = "ExperimentHub")
-        )), con = "DESCRIPTION")
+            list(biocViews = "ExperimentHub",
+                imports = c("ExperimentHubData", "ExperimentHub")
+            ))), con = "DESCRIPTION")
     } 
+}
+
+use_news <- function()
+{
+    fl <- system.file("rmarkdown", "templates", "hubPkg", "NEWS",
+        package = "AnnotationHubData")
+    tmpl <- readLines(fl)
+    writeLines(whisker.render(tmpl), "NEWS")
+}
+
+create_R_files <- function(package)
+{
+    #inst/script/make-data.R
+    fl <- system.file("rmarkdown", "templates", "hubPkg", "make-data.R",
+        package = "AnnotationHubData")
+    tmpl <- readLines(fl)
+    writeLines(whisker.render(tmpl), 
+        paste0(package, "inst/scripts/make-data.R")) 
+
+    #inst/script/make-metadata.R
+    fl <- system.file("rmarkdown", "templates", "hubPkg", "make-metadata.R",
+        package = "AnnotationHubData")
+    tmpl <- readLines(fl)
+    writeLines(whisker.render(tmpl), 
+        paste0(package, "inst/scripts/make-metadata.R"))
+
+    #R/zzz.R
+    fl <- system.file("rmarkdown", "templates", "hubPkg", "zzz.R",
+        package = "AnnotationHubData")
+    tmpl <- readLines(fl)
+    writeLines(whisker.render(tmpl), paste0(package, "R/zzz.R"))
 }
 
 hub_create_package <- function(package, 
@@ -43,36 +73,20 @@ hub_create_package <- function(package,
 
     create_package(package)
 
-    ## Customization of the DESCRIPTION file (use whisker to render DESCRIPTION)
     create_description(type, fields)
 
     use_package_doc()
     use_roxygen_md()
+    #use_readme_md(open = FALSE)
+    use_news()
 
-    if (type == "AnnotationHub") {
-        use_package("AnnotationHubData")
-        use_package("AnnotationHub")
-    }
-    else {
-        use_package("ExperimentHubData")
-        use_package("ExperimentHub")
-    }
-
-    ## Addition of README file
-    use_readme_md(open = FALSE)
-
-    ## Addition of NEWS file
-    use_news_md(open = FALSE)
-
-    ## Addition of the inst/extdata directory
+    use_directory("man")
     use_directory("inst/extdata")
 
-    ## Addition of the inst/script R files
-    use_scripts("make-data.R")
-    use_scripts("make-metadata.R")
+    #use_scripts("make-data.R")
+    #use_scripts("make-metadata.R")
+    create_R_files(package)
 
-    ## Addition of man/ directory
-    use_directory("man")
 }
     ## Addition of template csv file in inst/extdata
 #    file.create(paste0(getwd(),"/inst/extdata/metadata.csv"))
