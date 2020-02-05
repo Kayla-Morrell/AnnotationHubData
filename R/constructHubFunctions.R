@@ -1,11 +1,3 @@
-#use_scripts <- function(filename)
-#{
-#    stopifnot(length(filename) == 1 && is.character(filename))
-#
-#    use_directory("inst/scripts")
-#    edit_file(proj_path("inst/scripts", filename), open = FALSE)
-#}
-
 create_description <- function(type, fields)
 {
     fl <- system.file("rmarkdown", "templates", "hubPkg", "DESCRIPTION",
@@ -35,27 +27,15 @@ use_news <- function()
     writeLines(whisker.render(tmpl), "NEWS")
 }
 
-create_R_files <- function(package)
+create_script <- function(destination, package)
 {
-    #inst/script/make-data.R
-    fl <- system.file("rmarkdown", "templates", "hubPkg", "make-data.R",
+    fileName <- path_file(destination)
+
+    fl <- system.file("rmarkdown", "templates", "hubPkg", fileName,
         package = "AnnotationHubData")
     tmpl <- readLines(fl)
     writeLines(whisker.render(tmpl), 
-        paste0(package, "inst/scripts/make-data.R")) 
-
-    #inst/script/make-metadata.R
-    fl <- system.file("rmarkdown", "templates", "hubPkg", "make-metadata.R",
-        package = "AnnotationHubData")
-    tmpl <- readLines(fl)
-    writeLines(whisker.render(tmpl), 
-        paste0(package, "inst/scripts/make-metadata.R"))
-
-    #R/zzz.R
-    fl <- system.file("rmarkdown", "templates", "hubPkg", "zzz.R",
-        package = "AnnotationHubData")
-    tmpl <- readLines(fl)
-    writeLines(whisker.render(tmpl), paste0(package, "R/zzz.R"))
+        paste0(package, destination)) 
 }
 
 hub_create_package <- function(package, 
@@ -77,16 +57,15 @@ hub_create_package <- function(package,
 
     use_package_doc()
     use_roxygen_md()
-    #use_readme_md(open = FALSE)
     use_news()
 
     use_directory("man")
     use_directory("inst/extdata")
+    use_directory("inst/scripts")
 
-    #use_scripts("make-data.R")
-    #use_scripts("make-metadata.R")
-    create_R_files(package)
-
+    create_script("/inst/scripts/make-data.R", package)
+    create_script("/inst/scripts/make-metadata.R", package)
+    create_script("/R/zzz.R", package)
 }
     ## Addition of template csv file in inst/extdata
 #    file.create(paste0(getwd(),"/inst/extdata/metadata.csv"))
