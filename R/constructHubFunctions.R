@@ -58,25 +58,22 @@ hub_create_package <- function(package,
     use_package_doc()
     use_roxygen_md()
     use_news()
-
     use_directory("man")
-    use_directory("inst/extdata")
+    
     use_directory("inst/scripts")
-
     create_script("/inst/scripts/make-data.R", package)
     create_script("/inst/scripts/make-metadata.R", package)
     create_script("/R/zzz.R", package)
+
+    use_directory("inst/extdata")
+    df <- data.frame(matrix(ncol = 17, nrow = 0))
+    colnames(df) <- c("Title", "Description", "BiocVersion", "Genome", 
+        "SourceType", "SourceUrl", "SourceVersion", "Species", "TaxonomyId", 
+        "Coordinate_1_based", "DataProvider", "Maintainer", "RDataClass", 
+        "DispatchClass", "Location_Prefix", "RDataPath", "Tags")
+    write.table(df, file = paste0(package, "/inst/extdata/metadata.csv"), 
+        sep = ",", row.names = FALSE, col.names = TRUE)
 }
-    ## Addition of template csv file in inst/extdata
-#    file.create(paste0(getwd(),"/inst/extdata/metadata.csv"))
-#    df <- data.frame(matrix(ncol=17, nrow=0))
-#    x <- c("Title", "Description", "BiocVersion", "Genome", "SourceType", 
-#        "SourceUrl", "SourceVersion", "Species", "TaxonomyId", 
-#        "Coordinate_1_based", "DataProvider", "Maintainer", "RDataClass", 
-#        "DispatchClass", "Location_Prefix", "RDataPath", "Tags")
-#    colnames(df) <- x
-#    write.table(df, file = "/inst/extdata/metadata.csv", sep = ",",
-#        row.names = FALSE, col.names = TRUE)
 
 hub_create_resource <- function(package, title, description, biocversion, 
     genome, sourcetype, sourceurl, sourceversion, species, taxid, coordinate, 
