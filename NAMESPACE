@@ -8,7 +8,6 @@ import(GenomicFeatures)
 import(RCurl)
 import(BiocManager)
 import(Biostrings)
-import(usethis)
 
 importFrom(biocViews, recommendPackages)
 importMethodsFrom(AnnotationDbi, exists, get, saveDb)
@@ -41,9 +40,10 @@ importFrom(RSQLite, SQLite, sqliteCopyDatabase)
 importFrom(graphics, title)
 importFrom(utils,
     capture.output, data, download.file,
-    read.delim, read.table, str, read.csv
+    read.delim, read.table, str, read.csv, packageVersion
 )
 importFrom(available, available_on_cran, available_on_bioc, valid_package_name)
+importFrom(whisker, whisker.render)
 
 ### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ### Export S4 classes

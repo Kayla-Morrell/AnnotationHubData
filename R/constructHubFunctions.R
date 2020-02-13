@@ -1,92 +1,83 @@
-create_description <- function(type, fields)
+create_description <- function(type, fields, destination)
 {
     fl <- system.file("rmarkdown", "templates", "hubPkg", "DESCRIPTION",
         package = "AnnotationHubData")
     tmpl <- readLines(fl)
 
-    if (type == "AnnotationHub") {
-        writeLines(whisker.render(tmpl, data = c(fields, 
-            list(
-                biocViews = "AnnotationHub",
-                imports = c("AnnotationHubData", "AnnotationHub")
-            ))), con = "DESCRIPTION")
-    }
-    else {
-        writeLines(whisker.render(tmpl, data = c(fields,
-            list(biocViews = "ExperimentHub",
-                imports = c("ExperimentHubData", "ExperimentHub")
-            ))), con = "DESCRIPTION")
-    } 
+    if (type == "AnnotationHub")
+        lst <- list(biocViews = "AnnotationHub",
+            imports = c("AnnotationHubData", "AnnotationHub"))
+
+    else
+        lst <- list(biocViews = "ExperimentHub",
+            imports = c("ExperimentHubData", "ExperimentHub")) 
+
+    doc <- list(roxygen = packageVersion("roxygen2"))
+
+    writeLines(whisker.render(tmpl, data = c(fields, lst, doc)), con = destination)
 }
 
-use_news <- function()
+create_base_template <- function(destination)
 {
-    fl <- system.file("rmarkdown", "templates", "hubPkg", "NEWS",
+    fileName <- basename(destination)
+
+    fl <- system.file("rmarkdown", "templates", "hubPkg", fileName, 
         package = "AnnotationHubData")
     tmpl <- readLines(fl)
-    writeLines(whisker.render(tmpl), "NEWS")
+    writeLines(whisker.render(tmpl), destination)
 }
 
-create_script <- function(destination, package)
+create_package_doc <- function(field, path)
 {
-    fileName <- path_file(destination)
-
-    fl <- system.file("rmarkdown", "templates", "hubPkg", fileName,
+    fl <- system.file("rmarkdown", "templates", "hubPkg", "pkg-package.R", 
         package = "AnnotationHubData")
     tmpl <- readLines(fl)
-    writeLines(whisker.render(tmpl), 
-        paste0(package, destination)) 
+    destination <- file.path(path, "R", paste0(field, "-package.R"))
+    writeLines(whisker.render(tmpl, data = c(field)), con = destination)
 }
 
 hub_create_package <- function(package, 
     type = c("AnnotationHub", "ExperimentHub"),
-    fields = list(packageName = path_file(package), 
+    fields = list(packageName = basename(package), 
         version = "0.99.0", 
-        license = "Artistic-2.0"), 
-    check_name = TRUE)
+        license = "Artistic-2.0"))
 {
+    pth <- path.expand(package)
+    pkg <- basename(pth)
     stopifnot(
-        length(package) == 1 && is.character(package),
-        available_on_cran(package) == TRUE, 
-        available_on_bioc(package) == TRUE
+        "roxygen2" %in% loadedNamespaces(),
+        !file.exists(pth),
+        length(pkg) == 1 && is.character(pkg),
+        available_on_cran(pkg), 
+        available_on_bioc(pkg),
+        valid_package_name(pkg) 
     )
 
-    create_package(package)
-
-    create_description(type, fields)
-
-    use_package_doc()
-    use_roxygen_md()
-    use_news()
-    use_directory("man")
+    dir.create(pth, recursive = TRUE)
     
-    use_directory("inst/scripts")
-    create_script("/inst/scripts/make-data.R", package)
-    create_script("/inst/scripts/make-metadata.R", package)
-    create_script("/R/zzz.R", package)
+    create_description(type, fields, file.path(pth, "DESCRIPTION"))
+    create_base_template(file.path(pth, "NAMESPACE"))
+    dir.create(file.path(pth, "R"), recursive = TRUE)
 
-    use_directory("inst/extdata")
-    df <- data.frame(matrix(ncol = 17, nrow = 0))
-    colnames(df) <- c("Title", "Description", "BiocVersion", "Genome", 
-        "SourceType", "SourceUrl", "SourceVersion", "Species", "TaxonomyId", 
-        "Coordinate_1_based", "DataProvider", "Maintainer", "RDataClass", 
-        "DispatchClass", "Location_Prefix", "RDataPath", "Tags")
-    write.table(df, file = paste0(package, "/inst/extdata/metadata.csv"), 
-        sep = ",", row.names = FALSE, col.names = TRUE)
+    create_package_doc(list(package = pkg), pth)
+    create_base_template(file.path(pth, "NEWS"))
+    dir.create(file.path(pth, "man"), recursive = TRUE)
+    
+    dir.create(file.path(pth, "inst", "scripts"), recursive = TRUE)
+    create_base_template(file.path(pth, "inst", "scripts", "make-data.R"))
+    create_base_template(file.path(pth, "inst", "scripts", "make-metadata.R"))
+
+    if (type == "ExperimentHub")
+        create_base_template(file.path(pth, "R", "zzz.R"))
+
+    dir.create(file.path(pth, "inst", "extdata"), recursive = TRUE)
+    x <- c("Title", "Description", "BiocVersion", "Genome", "SourceType",
+        "SourceUrl", "SourceVersion", "Species", "TaxonomyId", 
+        "Coordinate_1_based",    
+        "DataProvider", "Maintainer", "RDataClass", "DispatchClass", 
+        "Location_Prefix", "RDataPath", "Tags") 
+    df <- data.frame(matrix(0, nrow = 0 , ncol = 17, dimnames = list(NULL, x)))
+    fl <- file.path(pth, "inst", "extdata", "metadata.csv")
+    write.csv(df, file = fl, row.names = FALSE)
+    invisible(path)
 }
-
-hub_create_resource <- function(package, title, description, biocversion, 
-    genome, sourcetype, sourceurl, sourceversion, species, taxid, coordinate, 
-    dataprovider, maintainer, rdataclass, dispatchclass, location, rdatapath, 
-    tags) 
-{
-
-    ## Check to be sure 'package' is a valid AH/EH package
-    stopifnot(available::available_on_bioc(package) == TRUE)
-
-    ## Read in the metadata.csv file
-    dat_path <- system.file("extdata", "metadata.csv", package = package)
-    dat <- read.csv(dat_path, header = TRUE)
-
-    ## Be sure to validate data along the way...
-} 

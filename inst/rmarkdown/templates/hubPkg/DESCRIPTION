@@ -12,4 +12,5 @@ License: {{license}}
 LazyData: FALSE
 Imports: {{imports}}
 biocViews: {{biocViews}}
+RoxygenNote: {{roxygen}}
 Encoding: UTF-8
