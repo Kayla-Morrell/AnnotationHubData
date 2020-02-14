@@ -81,3 +81,29 @@ hub_create_package <- function(package,
     write.csv(df, file = fl, row.names = FALSE)
     invisible(path)
 }
+
+hub_create_resource <- function(package, title, description, biocversion, 
+    genome, sourcetype, sourceurl, sourceversion, species, taxid, coordinate, 
+    dataprovider, maintainer, rdataclass, dispatchclass, location, rdatapath, 
+    tags)
+{
+
+    ## read in the metadata.csv file
+    if (available_on_bioc(package))
+        dat_path <- file.path(package, "inst", "extdata", "metadata.csv")
+    else
+        dat_path <- system.file("extdata", "metadata.csv", package = package)
+
+    metadata <- read.csv(file = dat_path)
+
+    ## create a data.frame from the input
+    df <- data.frame(title, description, biocversion, genome, sourcetype, 
+        sourceurl, sourceversion, species, taxid, coordinate, dataprovider, 
+        maintainer, rdataclass, dispatchclass, location, rdatapath, tags, 
+        stringsAsFactors = FALSE)
+
+    metadata[dim(metadata)[1]+1,] <- df
+    #makeAnnotationHubMetadata(package)
+    ## writing back into the csv file
+    write.csv(metadata, file = dat_path, row.names = FALSE)
+}
