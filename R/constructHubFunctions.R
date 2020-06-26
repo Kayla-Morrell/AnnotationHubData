@@ -48,14 +48,17 @@ hub_create_package <- function(package,
         "roxygen2" %in% loadedNamespaces(),
         !file.exists(pth),
         length(pkg) == 1 && is.character(pkg),
-        available_on_cran(pkg), 
+        length(available(pkg)) == 0L, 
         available_on_bioc(pkg),
         valid_package_name(pkg) 
     )
 
-    dir.create(pth, recursive = TRUE)
+    #dir.create(pth, recursive = TRUE)
+    usethis::create_package(pth)
     
-    create_description(type, fields, file.path(pth, "DESCRIPTION"))
+    #create_description(type, fields, file.path(pth, "DESCRIPTION"))
+    biocthis::use_bioc_description(biocViews = type)
+
     create_base_template(file.path(pth, "NAMESPACE"))
     dir.create(file.path(pth, "R"), recursive = TRUE)
 
