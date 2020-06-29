@@ -1,21 +1,21 @@
-create_description <- function(type, fields, destination)
-{
-    fl <- system.file("rmarkdown", "templates", "hubPkg", "DESCRIPTION",
-        package = "AnnotationHubData")
-    tmpl <- readLines(fl)
-
-    if (type == "AnnotationHub")
-        lst <- list(biocViews = "AnnotationHub",
-            imports = c("AnnotationHubData", "AnnotationHub"))
-
-    else
-        lst <- list(biocViews = "ExperimentHub",
-            imports = c("ExperimentHubData", "ExperimentHub")) 
-
-    doc <- list(roxygen = packageVersion("roxygen2"))
-
-    writeLines(whisker.render(tmpl, data = c(fields, lst, doc)), con = destination)
-}
+#create_description <- function(type, fields, destination)
+#{
+#    fl <- system.file("rmarkdown", "templates", "hubPkg", "DESCRIPTION",
+#        package = "AnnotationHubData")
+#    tmpl <- readLines(fl)
+#
+#    if (type == "AnnotationHub")
+#        lst <- list(biocViews = "AnnotationHub",
+#            imports = c("AnnotationHubData", "AnnotationHub"))
+#
+#    else
+#        lst <- list(biocViews = "ExperimentHub",
+#            imports = c("ExperimentHubData", "ExperimentHub")) 
+#
+#    doc <- list(roxygen = packageVersion("roxygen2"))
+#
+#    writeLines(whisker.render(tmpl, data = c(fields, lst, doc)), con = destination)
+#}
 
 create_base_template <- function(destination)
 {
@@ -38,9 +38,7 @@ create_package_doc <- function(field, path)
 
 hub_create_package <- function(package, 
     type = c("AnnotationHub", "ExperimentHub"),
-    fields = list(packageName = basename(package), 
-        version = "0.99.0", 
-        license = "Artistic-2.0"))
+    use_git = FALSE)
 {
     pth <- path.expand(package)
     pkg <- basename(pth)
@@ -55,15 +53,21 @@ hub_create_package <- function(package,
 
     #dir.create(pth, recursive = TRUE)
     usethis::create_package(pth)
+    usethis::proj_set(pth)
+
+    if (use_git) {
+        usethis::use_git()
+    }
     
     #create_description(type, fields, file.path(pth, "DESCRIPTION"))
     biocthis::use_bioc_description(biocViews = type)
 
-    create_base_template(file.path(pth, "NAMESPACE"))
-    dir.create(file.path(pth, "R"), recursive = TRUE)
+    #create_base_template(file.path(pth, "NAMESPACE")) ## NOT NEEDED ANYMORE!
+    #dir.create(file.path(pth, "R"), recursive = TRUE) ## NOT NEEDED ANYMORE!
 
     create_package_doc(list(package = pkg), pth)
-    create_base_template(file.path(pth, "NEWS"))
+    #create_base_template(file.path(pth, "NEWS"))
+    biocthis::use_bioc_news_md(open=FALSE)
     dir.create(file.path(pth, "man"), recursive = TRUE)
     
     dir.create(file.path(pth, "inst", "scripts"), recursive = TRUE)
@@ -82,7 +86,7 @@ hub_create_package <- function(package,
     df <- data.frame(matrix(0, nrow = 0 , ncol = 17, dimnames = list(NULL, x)))
     fl <- file.path(pth, "inst", "extdata", "metadata.csv")
     write.csv(df, file = fl, row.names = FALSE)
-    invisible(path)
+    invisible(pth)
 }
 
 hub_create_resource <- function(package, title, description, biocversion, 
