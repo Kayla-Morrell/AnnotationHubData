@@ -80,6 +80,12 @@ hub_create_package <- function(package,
     #df <- data.frame(matrix(0, nrow = 0 , ncol = 17, dimnames = list(NULL, x)))
     #fl <- file.path(pth, "inst", "extdata", "metadata.csv")
     #write.csv(df, file = fl, row.names = FALSE)
+
+    usethis::use_testthat()
+    usethis::use_template("test_metadata.R",
+        save_as = "/tests/testthat/test_metadata.R",
+        data = list(type = type),
+        package = "AnnotationHubData")
     invisible(pth)
 }
 
@@ -118,7 +124,7 @@ hub_create_package <- function(package,
 #'
 #' @examples
 #' tst <- list(title = "ENCODE", description = "a test entry", biocversion = "3.9", genome = NA, sourcetype = "JSON", sourceurl = "https://www.encodeproject.org", sourceversion = NA, species = NA, taxonomyid = NA, coordinate1based = NA, dataprovider = "ENCODE Porject", maintainer = "tst person <tst@email.com>", rdataclass = "data.table", dispatchclass = "Rda", locationprefix = NA, rdatapath = "ENCODExplorerData/encode_df_lite.rda", tags = "ENCODE")
-#' hub_add_resource("~/Document/tstPkg", fields = tst)
+#' hub_add_resource("~/Documents/tstPkg", fields = tst)
 hub_add_resource <- function(package, fields)
 {
     fl <- system.file("inst", "templates", "metadata.csv",
