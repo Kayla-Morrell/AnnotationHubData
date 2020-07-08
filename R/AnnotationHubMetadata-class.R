@@ -34,8 +34,14 @@ setClass("AnnotationHubMetadata",
     if (!length(fileName))
         fileName <- "metadata.csv"
     path <- file.path(pathToPackage, "inst", "extdata")
-    meta <- read.csv(file.path(path, fileName), colClasses="character",
-                     stringsAsFactors=FALSE)
+    metadataFile <- file.path(path, fileName)
+    .readMetadataFromCsvFile(metadataFile)
+}
+
+.readMetadataFromCsvFile <-
+    function(metadataFile)
+{
+    meta <- read.csv(metadataFile, colClasses="character")
     mat <- rbind(c("Title", "character"),
                  c("Description", "character"),
                  c("BiocVersion", "character"),
@@ -261,6 +267,49 @@ globalVariables(c("BiocVersion", "Coordinate_1_based", "DataProvider",
                   "Maintainer", "RDataClass", "RDataDateAdded", "RDataPath",
                   "SourceType", "SourceUrl", "SourceVersion", "Species",
                   "TaxonomyId", "Title"))
+
+testAnnotationHubMetadata <-
+    function(packageName, metadataFile)
+{
+    ## metadataFile is the full path to the metadata.csv file
+    .package <- packageName # alias for consistency with code in other functions
+    stopifnot(
+        is.character(.package), length(.package) == 1L, !nzchar(.package),
+        !is.na(.package),
+        is.character(metadataFile), length(metadataFile) == 1L,
+        !nzchar(metadataFile), !is.na(metadataFile),
+        file.exists(metadataFile)
+    )
+
+    meta <- .readMetadataFromCsvFile(metadataFile)
+    ## instantiate AnnotationHubMetdata objects for each row, as test
+    ## of validity
+    lapply(seq_len(nrow(meta)), function(x) {
+        with(meta[x, ], {
+            AnnotationHubMetadata(
+                Title=Title, Description=Description,
+                BiocVersion=BiocVersion, Genome=Genome,
+                SourceType=SourceType,
+                SourceUrl=SourceUrl,
+                SourceVersion=SourceVersion,
+                Species=Species, TaxonomyId=TaxonomyId,
+                Coordinate_1_based=Coordinate_1_based,
+                DataProvider=DataProvider,
+                Maintainer=Maintainer,
+                RDataClass=RDataClass, Tags=.tags[[x]],
+                RDataDateAdded=RDataDateAdded,
+                RDataPath=.RDataPaths[[x]],
+                Recipe=NA_character_,
+                DispatchClass=DispatchClass,
+                PreparerClass=.package,
+                Location_Prefix=Location_Prefix
+            )
+        })
+    })
+
+    ## if we've got this far, the file is valid
+    TRUE
+}
 
 ## Used for contributed packages, not internal recipes.
 makeAnnotationHubMetadata <- function(pathToPackage, fileName=character())
