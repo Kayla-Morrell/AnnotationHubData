@@ -1,3 +1,24 @@
+CHANGES IN VERSION 1.19.0
+------------------------
+
+INTERNAL BUG CORRECTION
+
+    o 1.19.2 Update Metadata from Ensembl function to use
+    GenomeInfoDb:::fetch_species_index_from_Ensembl_FTP instead of parsing the
+    file path
+    o 1.19.1 misplaced ! clause
+ 
+
+CHANGES IN VERSION 1.17.0
+------------------------
+
+MODIFICATIONS
+
+    o 1.17.3 add check for valid Title and Description in metadata file. It
+    should not be empty or NA
+    o 1.17.2 add XML as valid source type
+    o 1.17.1 add GSEMatrix as valid source type
+
 CHANGES IN VERSION 1.15.0
 ------------------------
 

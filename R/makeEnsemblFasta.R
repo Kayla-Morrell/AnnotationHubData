@@ -22,28 +22,31 @@
 ## FIXME: This should be combined with .httrFileInfo() and .ftpFileInfo()
 .ensemblMetadataFromUrl <- function(sourceUrl, twobit=FALSE, http=FALSE) {
     releaseRegex <- ".*(release-[[:digit:]]+).*"
-    if (!twobit)
-      title <- sub("\\.gz$", "", basename(sourceUrl))
-    else
-      title <- sub("\\.fa\\.gz$", ".2bit", basename(sourceUrl))
+    if (!twobit){
+        title <- sub("\\.gz$", "", basename(sourceUrl))
+    }else{
+        title <- sub("\\.fa\\.gz$", ".2bit", basename(sourceUrl))
+    }
     root <- setNames(rep(NA_character_, length(sourceUrl)), title)
-    ## genome followed by underscore 
-    genome <- sub("^([[:alpha:]_]+)\\.(\\w*)\\.(.*)", "\\2", title, perl=TRUE)
-    ## genome followed by dot 
-    splitGenome <- strsplit(genome, '\\.')
-    if (any(xx <- lengths(splitGenome) > 1L))
-        genome[xx] <- sapply(splitGenome[xx], "[", 2)
-    ## species is fist two terms separated by underscore
-    species <- strsplit(sub("^([[:alpha:]_]+)\\.(.*)", "\\1", title), "_")
-    if (any(yy <- lengths(species) > 2L)) 
-        species[yy] <- lapply(species[yy], function(ii) ii[1:2])
-    species <- sapply(species, paste0, collapse=" ")
-    taxonomyId <- local({
-        uspecies <- unique(species)
-        utaxid <- vapply(uspecies, GenomeInfoDb:::lookup_tax_id_by_organism,
-                         integer(1))
-        utaxid[match(species, uspecies)]
-    })
+
+    releaseNum <- sub("release-", "", sub(releaseRegex, "\\1", sourceUrl[1]))
+
+    # as of release 96 a file is present with species index for mappings
+    species_index <- GenomeInfoDb:::fetch_species_index_from_Ensembl_FTP(release=releaseNum)
+
+    species <- vapply(strsplit(sourceUrl, '/'), function(x) x[[7]], character(1))
+    genome <- vapply(species, FUN.VALUE=character(1), USE.NAMES=FALSE,
+                     FUN=function(spc, tbl){
+                         message(spc, "\n")
+                         tbl[tbl$species == spc, "assembly"]
+                     }, tbl=species_index)
+    taxonomyId <- vapply(species, FUN.VALUE=integer(1), USE.NAMES=FALSE,
+                     FUN=function(spc, tbl){
+                         message(spc, "\n")
+                         tbl[tbl$species == spc, "taxonomy_id"]
+                     }, tbl=species_index)
+
+    species <- sub("_", " ", species,fixed=TRUE)
 
     if (http) {
        ftpInfo <- .httrFileInfo(sourceUrl)

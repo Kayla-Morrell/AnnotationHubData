@@ -18,8 +18,7 @@
     load(system.file('extdata','viableIDs.rda', package='AnnotationForge'))
     ids <- results
 
-    if (justRunUnitTest)
-    ids <- head(ids)
+    if (justRunUnitTest) ids <- head(ids)
     ## FIXME: need different solution; this subset produces NAs
     if (length(biocVersion) > 1) {
         stop(paste("'biocVersion' must be a single value. Make sure new",
@@ -75,7 +74,7 @@
 
     if (length(aws)){
         s3titles <- sapply(strsplit(sapply(strsplit(aws, " "),"[[", 4), "/"),"[[",4)
-        subset <- !(title %in% s3titles)
+        subset <- (title %in% s3titles)
         if(any(subset)){
             lst <- lapply(list(title=title, species = oriSpecies,
                                taxonomyId = taxonomyId, genome = genome, sourceUrl=sourceUrl,

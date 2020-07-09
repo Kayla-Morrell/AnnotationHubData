@@ -99,7 +99,7 @@
             con <- tryCatch(getURL(ul), error=identity)
             if (!inherits(con, "error"))
                 break
-            Sys.sleep(10)
+            Sys.sleep(30)
             N.TRIES <- N.TRIES - 1L
         }
         if (N.TRIES == 0L) {
