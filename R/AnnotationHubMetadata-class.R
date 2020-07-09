@@ -274,14 +274,26 @@ testAnnotationHubMetadata <-
     ## metadataFile is the full path to the metadata.csv file
     .package <- packageName # alias for consistency with code in other functions
     stopifnot(
-        is.character(.package), length(.package) == 1L, !nzchar(.package),
+        is.character(.package), length(.package) == 1L, nzchar(.package),
         !is.na(.package),
         is.character(metadataFile), length(metadataFile) == 1L,
-        !nzchar(metadataFile), !is.na(metadataFile),
+        nzchar(metadataFile), !is.na(metadataFile),
         file.exists(metadataFile)
     )
 
     meta <- .readMetadataFromCsvFile(metadataFile)
+    if (is.na(meta$Tags) || !length(meta$Tags))
+        stop("please add 'Tags' values to metadata")
+
+    .tags <- strsplit(meta$Tags, ":")
+    .tags <- lapply(.tags, FUN <- function(x, packageName){
+            sort(unique(c(x, packageName)))
+        }, packageName=.package)
+    if (any(unlist(lapply(.tags, FUN=length)) <= 1))
+        stop("Add 2 or more Tags to each resource.")
+
+    .RDataPaths <- meta$RDataPath
+
     ## instantiate AnnotationHubMetdata objects for each row, as test
     ## of validity
     lapply(seq_len(nrow(meta)), function(x) {

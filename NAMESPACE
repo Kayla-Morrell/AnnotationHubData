@@ -68,6 +68,7 @@ exportClasses(
 
 export(
     AnnotationHubMetadata, makeAnnotationHubMetadata,
+    testAnnotationHubMetadata,
     UCSCTrackImportPreparer,
     #postProcessMetadata,
     flog,

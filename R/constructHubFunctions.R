@@ -84,7 +84,7 @@ hub_create_package <- function(package,
     usethis::use_testthat()
     usethis::use_template("test_metadata.R",
         save_as = "/tests/testthat/test_metadata.R",
-        data = list(type = type),
+        data = list(type = type, package = pkg),
         package = "AnnotationHubData")
     invisible(pth)
 }
