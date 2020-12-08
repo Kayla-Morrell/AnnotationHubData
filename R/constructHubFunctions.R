@@ -137,16 +137,10 @@ hub_add_resource <- function(package, fields)
     else
         dat_path <- system.file("extdata", "metadata.csv", package = package)
 
-    metadata <- read.csv(file = dat_path)
+    #metadata <- read.csv(file = dat_path)
 
-    ## create a data.frame from the input
-    #df <- data.frame(title, description, biocversion, genome, sourcetype, 
-    #    sourceurl, sourceversion, species, taxid, coordinate, dataprovider, 
-    #    maintainer, rdataclass, dispatchclass, location, rdatapath, tags, 
-    #    stringsAsFactors = FALSE)
-    
     dat <- strsplit(whisker.render(tmpl, data = fields), ",")
-    metadata[dim(metadata)[1]+1,] <- dat[[1]]
-    write.csv(metadata, file = dat_path, row.names = FALSE)
-    #makeAnnotationHubMetadata(package)
+    #metadata[dim(metadata)[1]+1,] <- dat[[1]]
+    write.table(dat, file = dat_path, row.names = FALSE, sep = ",", append = TRUE)
+    #test*HubMetadata(package) change for specific hub
 }
